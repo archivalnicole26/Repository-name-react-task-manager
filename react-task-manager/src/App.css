@@ -207,7 +207,7 @@ nav {
 
 /* INPUT */
 
-..task-input input {
+.task-input input {
   flex: 1;
   border: 1px solid #e1e4eb;
   border-radius: 10px;

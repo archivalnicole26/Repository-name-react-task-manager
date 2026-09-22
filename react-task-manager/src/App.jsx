@@ -1,17 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
- const [tasks, setTasks] = useState(() => {
-  const savedTasks = localStorage.getItem("tasks");
-  return savedTasks ? JSON.parse(savedTasks) : [];
-});
- const [task, setTask] = useState("");
- 
- useEffect(() => {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-}, [tasks]);
+  const [task, setTask] = useState("");
+  const [tasks, setTasks] = useState([]);
 
+  // Add a task
   const addTask = () => {
     if (task.trim() === "") {
       return;
@@ -19,130 +13,285 @@ function App() {
 
     const newTask = {
       id: Date.now(),
-      title: task,
+      title: task.trim(),
       completed: false,
     };
 
-    setTasks([...tasks, newTask]);
+    setTasks((currentTasks) => [...currentTasks, newTask]);
     setTask("");
   };
 
+  // Complete / uncomplete a task
   const toggleTask = (id) => {
-    setTasks(
-      tasks.map((item) =>
+    setTasks((currentTasks) =>
+      currentTasks.map((item) =>
         item.id === id
-          ? {
-              ...item,
-              completed: !item.completed,
-            }
+          ? { ...item, completed: !item.completed }
           : item
       )
     );
   };
 
+  // Delete a task
   const deleteTask = (id) => {
-    setTasks(tasks.filter((item) => item.id !== id));
+    setTasks((currentTasks) =>
+      currentTasks.filter((item) => item.id !== id)
+    );
   };
+
+  const totalTasks = tasks.length;
 
   const completedTasks = tasks.filter(
     (item) => item.completed
   ).length;
 
-  const pendingTasks = tasks.length - completedTasks;
+  const pendingTasks = totalTasks - completedTasks;
 
   return (
     <div className="app">
-      <div className="container">
 
-        <header className="header">
-          <h1>React Task Manager</h1>
-          <p>Organize your tasks and stay productive.</p>
+      {/* Sidebar */}
+      <aside className="sidebar">
+
+        <div className="logo">
+          <div className="logo-icon">✓</div>
+
+          <div>
+            <h2>FocusFlow</h2>
+            <span>Task Manager</span>
+          </div>
+        </div>
+
+        <nav>
+          <div className="nav-item active">
+            <span>▦</span>
+            Dashboard
+          </div>
+
+          <div className="nav-item">
+            <span>✓</span>
+            My Tasks
+          </div>
+
+          <div className="nav-item">
+            <span>★</span>
+            Completed
+          </div>
+        </nav>
+
+        <div className="sidebar-footer">
+          <p>Stay focused.</p>
+          <strong>Get things done.</strong>
+        </div>
+
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+
+        {/* Header */}
+        <header className="top-header">
+
+          <div>
+            <p className="welcome">WELCOME BACK 👋</p>
+
+            <h1>Task Manager</h1>
+
+            <p className="subtitle">
+              Plan your day. Complete your goals. Stay productive.
+            </p>
+          </div>
+
+          <div className="date-box">
+            <span>Today</span>
+
+            <strong>
+              {new Date().toLocaleDateString()}
+            </strong>
+          </div>
+
         </header>
 
-        <div className="task-input">
-          <input
-            type="text"
-            placeholder="Enter a new task..."
-            value={task}
-            onChange={(e) => setTask(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                addTask();
-              }
-            }}
-          />
+        {/* Add Task */}
+        <section className="add-card">
 
-          <button onClick={addTask}>
-            Add Task
-          </button>
-        </div>
+          <div className="add-title">
 
-        <div className="statistics">
+            <div className="plus-icon">+</div>
+
+            <div>
+              <h2>Create a new task</h2>
+
+              <p>
+                What do you want to accomplish?
+              </p>
+            </div>
+
+          </div>
+
+          <div className="task-input">
+
+            <input
+              type="text"
+              placeholder="Enter your task..."
+              value={task}
+              onChange={(e) => setTask(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  addTask();
+                }
+              }}
+            />
+
+            <button onClick={addTask}>
+              Add Task
+            </button>
+
+          </div>
+
+        </section>
+
+        {/* Statistics */}
+        <section className="stats">
 
           <div className="stat-card">
-            <h2>{tasks.length}</h2>
-            <p>Total Tasks</p>
+
+            <div className="stat-icon total">
+              ▦
+            </div>
+
+            <div>
+              <span>Total Tasks</span>
+              <strong>{totalTasks}</strong>
+            </div>
+
           </div>
 
           <div className="stat-card">
-            <h2>{completedTasks}</h2>
-            <p>Completed</p>
+
+            <div className="stat-icon completed">
+              ✓
+            </div>
+
+            <div>
+              <span>Completed</span>
+              <strong>{completedTasks}</strong>
+            </div>
+
           </div>
 
           <div className="stat-card">
-            <h2>{pendingTasks}</h2>
-            <p>Pending</p>
+
+            <div className="stat-icon pending">
+              ◷
+            </div>
+
+            <div>
+              <span>Pending</span>
+              <strong>{pendingTasks}</strong>
+            </div>
+
           </div>
 
-        </div>
+        </section>
 
-        <div className="task-container">
+        {/* My Tasks */}
+        <section className="tasks-card">
 
-          <h2>My Tasks</h2>
+          <div className="section-heading">
+
+            <div>
+              <h2>My Tasks</h2>
+
+              <p>
+                Your personal productivity list
+              </p>
+            </div>
+
+            <span className="task-count">
+              {totalTasks}{" "}
+              {totalTasks === 1 ? "task" : "tasks"}
+            </span>
+
+          </div>
 
           {tasks.length === 0 ? (
-            <p className="empty">
-              No tasks yet. Add your first task!
-            </p>
+
+            <div className="empty-state">
+
+              <div className="empty-icon">
+                ✓
+              </div>
+
+              <h3>
+                Your task list is empty
+              </h3>
+
+              <p>
+                Add your first task above and start
+                getting things done.
+              </p>
+
+            </div>
+
           ) : (
-            tasks.map((item) => (
-              <div
-                className={`task-item ${
-                  item.completed ? "completed" : ""
-                }`}
-                key={item.id}
-              >
 
-                <div className="task-left">
+            <div className="task-list">
 
-                  <input
-                    type="checkbox"
-                    checked={item.completed}
-                    onChange={() => toggleTask(item.id)}
-                  />
+              {tasks.map((item) => (
 
-                  <span>{item.title}</span>
+                <div
+                  className={`task-item ${
+                    item.completed ? "completed" : ""
+                  }`}
+                  key={item.id}
+                >
+
+                  <label className="task-left">
+
+                    <input
+                      type="checkbox"
+                      checked={item.completed}
+                      onChange={() =>
+                        toggleTask(item.id)
+                      }
+                    />
+
+                    <span className="custom-check"></span>
+
+                    <span className="task-title">
+                      {item.title}
+                    </span>
+
+                  </label>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() =>
+                      deleteTask(item.id)
+                    }
+                  >
+                    Delete
+                  </button>
 
                 </div>
 
-                <button
-                  className="delete-button"
-                  onClick={() => deleteTask(item.id)}
-                >
-                  Delete
-                </button>
+              ))}
 
-              </div>
-            ))
+            </div>
+
           )}
 
-        </div>
+        </section>
 
         <footer>
-          React Task Manager © 2026
+          <p>
+            FocusFlow • Simple tools for better productivity
+          </p>
         </footer>
 
-      </div>
+      </main>
+
     </div>
   );
 }
